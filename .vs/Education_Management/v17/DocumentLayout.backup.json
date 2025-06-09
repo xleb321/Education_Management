@@ -3,8 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\Admin\\Documents\\GitHub\\Education_Management\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\Documents\\GitHub\\Education_Management\\docker-compose.yml||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:docker-compose.yml||{8B382828-6202-11D1-8870-0000F87579D2}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\Documents\\GitHub\\Education_Management\\server\\prisma\\schema.prisma||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:server\\prisma\\schema.prisma||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\Documents\\GitHub\\Education_Management\\server\\prisma\\classes\\AccessCard.prisma||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:server\\prisma\\classes\\AccessCard.prisma||{8B382828-6202-11D1-8870-0000F87579D2}"
     }
   ],
   "DocumentGroupContainers": [
@@ -19,14 +23,27 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "docker-compose.yml",
-              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\Education_Management\\docker-compose.yml",
-              "RelativeDocumentMoniker": "docker-compose.yml",
-              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\Education_Management\\docker-compose.yml",
-              "RelativeToolTip": "docker-compose.yml",
-              "ViewState": "AgIAAAoAAAAAAAAAAAAqwCgAAAAQAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003775|",
-              "WhenOpened": "2025-06-09T19:21:17.031Z",
+              "Title": "schema.prisma",
+              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\Education_Management\\server\\prisma\\schema.prisma",
+              "RelativeDocumentMoniker": "server\\prisma\\schema.prisma",
+              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\Education_Management\\server\\prisma\\schema.prisma",
+              "RelativeToolTip": "server\\prisma\\schema.prisma",
+              "ViewState": "AgIAAMUAAAAAAAAAAAAIwN0AAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-06-09T19:41:39.21Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AccessCard.prisma",
+              "DocumentMoniker": "C:\\Users\\Admin\\Documents\\GitHub\\Education_Management\\server\\prisma\\classes\\AccessCard.prisma",
+              "RelativeDocumentMoniker": "server\\prisma\\classes\\AccessCard.prisma",
+              "ToolTip": "C:\\Users\\Admin\\Documents\\GitHub\\Education_Management\\server\\prisma\\classes\\AccessCard.prisma",
+              "RelativeToolTip": "server\\prisma\\classes\\AccessCard.prisma",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-06-09T19:41:32.491Z",
               "EditorCaption": ""
             }
           ]
