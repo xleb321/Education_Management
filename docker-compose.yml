@@ -1,6 +1,4 @@
-version: '3.8'
-
-services:
+﻿services:
   db:
     image: postgres:17
     environment:
@@ -12,7 +10,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-user}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-user} -d ${DB_NAME:-mydb}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -34,10 +32,10 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - REACT_APP_API_URL=http://localhost:3001
+      - REACT_APP_API_URL=http://server:3001
     depends_on:
       - server
     restart: unless-stopped
 
 volumes:
-  postgres_data_17:
+  postgres_data:
