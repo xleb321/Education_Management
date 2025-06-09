@@ -4,7 +4,6 @@ import jwt from "@fastify/jwt";
 import { PrismaClient } from "@prisma/client";
 import dotenv from "dotenv";
 
-// Инициализация
 dotenv.config();
 const prisma = new PrismaClient();
 const fastify = Fastify({
@@ -33,10 +32,6 @@ fastify.register(jwt, {
 
 fastify.get("/", async () => {
   return { message: "Hello from Dockerized Fastify!" };
-});
-
-fastify.get("/health", async (req, reply) => {
-  return { status: "OK" };
 });
 
 fastify.post("/registration", async (req, reply) => {
@@ -72,10 +67,10 @@ fastify.get("/test-db", async () => {
 
 const start = async () => {
   try {
-    // await fastify.listen({
-    //   port: 3001,
-    //   host: "0.0.0.0",
-    // });
+    await fastify.listen({
+      port: 3001,
+      host: "0.0.0.0",
+    });
     // fastify.log.info(`Server running at ${fastify.server.address().port}`);
   } catch (err) {
     fastify.log.error(err);
