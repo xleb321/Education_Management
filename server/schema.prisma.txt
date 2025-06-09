@@ -35,15 +35,10 @@ model User {
   materials_uploaded StudyMaterial[]
   access_cards  AccessCard[]
   attendance    Attendance[]
-  messages_sent Message[]       @relation("MessageSender")
-  messages_received Message[]    @relation("MessageRecipient")
-  applications  Application[]    @relation("ApplicationApplicant")
-  applications_resolved Application[] @relation("ApplicationResolvedBy")
-  scholarships_received Scholarship[] @relation("ScholarshipStudent")
-  scholarships_approved Scholarship[] @relation("ScholarshipApprovedBy")
+  messages_sent Message[]
+  applications  Application[]
+  scholarships  Scholarship[]
   notifications Notification[]
-  grades        Grade[]
-  schedules_taught Schedule[]
 }
 
 model Role {
@@ -192,27 +187,27 @@ model Schedule {
 
 model Application {
   id           Int       @id @default(autoincrement())
-  applicant    User      @relation("ApplicationApplicant", fields: [applicant_id], references: [id])
+  applicant    User      @relation(fields: [applicant_id], references: [id])
   applicant_id Int
   type         String    @db.VarChar(50)
   status       String    @default("На рассмотрении") @db.VarChar(20)
   content      String?
   created_at   DateTime  @default(now())
   resolved_at  DateTime?
-  resolved_by  User?     @relation("ApplicationResolvedBy", fields: [resolved_by_id], references: [id])
+  resolved_by  User?     @relation(fields: [resolved_by_id], references: [id])
   resolved_by_id Int?
 }
 
 model Scholarship {
   id          Int       @id @default(autoincrement())
-  student     User      @relation("ScholarshipStudent", fields: [student_id], references: [id])
+  student     User      @relation(fields: [student_id], references: [id])
   student_id  Int
   type        String    @db.VarChar(50)
-  amount      Decimal   @db.Decimal(10, 2)
+  amount      Float     @db.Decimal(10, 2)
   start_date  DateTime
   end_date    DateTime?
   is_active   Boolean   @default(true)
-  approved_by User?     @relation("ScholarshipApprovedBy", fields: [approved_by_id], references: [id])
+  approved_by User?     @relation(fields: [approved_by_id], references: [id])
   approved_by_id Int?
 }
 
