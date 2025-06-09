@@ -3,17 +3,35 @@ import axios from 'axios';
 
 function App() {
   const [message, setMessage] = useState('');
+  const [health, setHealth] = useState('checking...');
 
   useEffect(() => {
-    axios.get('http://localhost:3001')
-      .then(res => setMessage(res.data.message))
-      .catch(err => console.log(err));
+    const fetchData = async () => {
+      try {
+        const healthResponse = await axios.get(`${process.env.REACT_APP_API_URL}/health`);
+        setHealth(healthResponse.data.status || 'OK');
+        
+        const messageResponse = await axios.get(process.env.REACT_APP_API_URL);
+        setMessage(messageResponse.data.message);
+      } catch (err) {
+        console.error('API Error:', err);
+        setHealth('FAILED');
+        setMessage('Error connecting to backend');
+      }
+    };
+
+    fetchData();
   }, []);
 
   return (
-    <div>
-      <h1>Frontend: Привет, мир!</h1>
-      <p>Backend говорит: {message}</p>
+    <div style={{ padding: '20px' }}>
+      <h1>Dockerized React + Fastify</h1>
+      <div>
+        <strong>Backend Status:</strong> {health}
+      </div>
+      <div>
+        <strong>API Response:</strong> {message || 'Loading...'}
+      </div>
     </div>
   );
 }

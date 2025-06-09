@@ -1,32 +1,43 @@
-version: "3.8"
+version: '3.8'
 
 services:
   db:
-    image: postgres:13
+    image: postgres:17
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: mydb
+      POSTGRES_USER: ${DB_USER:-user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-mydb}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-user}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   server:
     build: ./server
     ports:
       - "3001:3001"
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER:-user}:${DB_PASSWORD:-password}@db:5432/${DB_NAME:-mydb}?schema=public
+      - JWT_SECRET=${JWT_SECRET:-your_super_secret_key}
     depends_on:
-      - db
-    env_file:
-      - .env
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
   client:
     build: ./client
     ports:
       - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:3001
     depends_on:
       - server
+    restart: unless-stopped
 
 volumes:
-  postgres_data:
+  postgres_data_17:
