@@ -10,7 +10,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-user} -d ${DB_NAME:-mydb}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d yourdb"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -20,7 +20,7 @@ services:
     ports:
       - "3001:3001"
     environment:
-      - DATABASE_URL=postgresql://${DB_USER:-user}:${DB_PASSWORD:-password}@db:5432/${DB_NAME:-mydb}?schema=public
+      - DATABASE_URL=postgresql://postgres:yourpassword@db:5432/yourdb?schema=public
       - JWT_SECRET=${JWT_SECRET:-your_super_secret_key}
     depends_on:
       db:
