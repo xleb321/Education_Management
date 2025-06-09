@@ -39,6 +39,28 @@ fastify.get("/health", async (req, reply) => {
   return { status: "OK" };
 });
 
+fastify.post("/registration", async (req, reply) => {
+  try {
+    reply.code(201).send("Получены данные:", req.body);
+    console.log("Получены данные:", req.body);
+    // Пример сохранения данных в базу данных через Prisma
+    // const newApplicant = await prisma.applicant.create({
+    //   data: {
+    //     firstName: req.body.firstName,
+    //     lastName: req.body.lastName,
+    //     email: req.body.email,
+    //     phone: req.body.phone,
+    //     course: req.body.course,
+    //     birthDate: new Date(req.body.birthDate),
+    //   },
+    // });
+    // reply.code(201).send({ message: "Данные успешно сохранены", data: newApplicant });
+  } catch (error) {
+    console.error("Ошибка:", error);
+    reply.code(500).send({ error: "Ошибка при обработке данных" });
+  }
+});
+
 fastify.get("/test-db", async () => {
   try {
     await prisma.$connect();
@@ -50,11 +72,11 @@ fastify.get("/test-db", async () => {
 
 const start = async () => {
   try {
-    await fastify.listen({
-      port: 3001,
-      host: "0.0.0.0",
-    });
-    fastify.log.info(`Server running at ${fastify.server.address().port}`);
+    // await fastify.listen({
+    //   port: 3001,
+    //   host: "0.0.0.0",
+    // });
+    // fastify.log.info(`Server running at ${fastify.server.address().port}`);
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
