@@ -27,7 +27,9 @@ services:
     restart: unless-stopped
 
   server:
-    build: ./server
+    build:
+      context: .  # Контекст - корень проекта
+      dockerfile: ./server/Dockerfile # Указание на расположение Dockerfile
     ports:
       - "3001:3001"
     environment:
