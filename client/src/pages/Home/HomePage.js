@@ -1,41 +1,105 @@
-import React from "react";
+import React, { useState } from "react";
 import "./HomePage.css";
+import { Link } from "react-router-dom";
 
 const HomePage = () => {
+  const [activeDropdown, setActiveDropdown] = useState(null);
+
+  const toggleDropdown = (index) => {
+    setActiveDropdown(activeDropdown === index ? null : index);
+  };
+
+  const directions = [
+    {
+      title: "Управление в технических системах",
+      items: [
+        "Интеллектуальные средства обработки информации",
+        "Качество и управление в технических системах",
+        "Комплексные системы безопасности",
+        "Робототехника и искусственный интеллект",
+        "Системы и средства автоматизации технологических процессов",
+      ],
+      link: "fitu",
+    },
+    {
+      title: "Электроэнергетика и электротехника",
+      items: [], // можно добавить подпункты, если они есть
+      link: "CK",
+    },
+    // можно добавить другие направления
+  ];
+
   return (
     <div className="home-page">
       <section className="hero">
         <h1>Добро пожаловать в Университет Технологий</h1>
         <p>Лидер в области инновационного образования и научных исследований</p>
-        <button className="button">Узнать больше</button>
+        <button className="button">Подать заявку</button>
       </section>
 
       <section className="features">
         <div className="feature-card">
-          <h3>Качественное образование</h3>
-          <p>Наши программы соответствуют международным стандартам</p>
+          <h3>Рост по карьерной лестнице</h3>
+          <p>
+            Руководящие должности доступны преимущественно специалистам с высшим
+            образованием.
+          </p>
         </div>
         <div className="feature-card">
-          <h3>Современные лаборатории</h3>
-          <p>Оснащены самым современным оборудованием</p>
+          <h3>Вакансии в крупных компаниях</h3>
+          <p>
+            Диплом вуза обязателен при трудоустройстве в государственные
+            корпорации и частные холдинги.
+          </p>
         </div>
         <div className="feature-card">
-          <h3>Международное признание</h3>
-          <p>Наши дипломы ценятся по всему миру</p>
+          <h3>Подтверждённая квалификация</h3>
+          <p>
+            Работодатели ценят кандидатов, чья квалификация подтверждена
+            соответствующими документамю.
+          </p>
+        </div>
+        <div className="feature-card">
+          <h3>Увеличение доходов</h3>
+          <p>
+            Заработная плата сотрудников с дипломом вуза выше, чем у сотрудников
+            без высшего образования.
+          </p>
         </div>
       </section>
 
-      <section className="news">
-        <h2>Последние новости</h2>
-        <div className="news-item">
-          <h3>Открытие нового корпуса</h3>
-          <p>
-            15 сентября состоится торжественное открытие нового учебного корпуса
-          </p>
-        </div>
-        <div className="news-item">
-          <h3>Научная конференция</h3>
-          <p>Приглашаем всех желающих на ежегодную научную конференцию</p>
+      <section className="choose-direction">
+        <h1>Выбери свое направление</h1>
+        <div className="directions-container">
+          {directions.map((direction, index) => (
+            <div
+              className={`direction-dropdown ${
+                activeDropdown === index ? "open" : ""
+              }`}
+            >
+              <div
+                className="direction-title"
+                onClick={() => toggleDropdown(index)}
+              >
+                {direction.title}
+                <span className="dropdown-icon">
+                  {activeDropdown === index ? "▲" : "▼"}
+                </span>
+              </div>
+              <div className="direction-content">
+                <ul>
+                  {direction.items.map((item, itemIndex) => (
+                    <li key={itemIndex}>{item}</li>
+                  ))}
+                </ul>
+                {direction.items.length > 0 && (
+                  <Link to={`/directions/${direction.link}`}>
+                    <button className="details-button button">подробнее</button>
+                  </Link>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
     </div>

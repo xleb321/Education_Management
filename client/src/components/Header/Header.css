@@ -1,43 +1,118 @@
-/* Стили для шапки */
+/* Header.css */
 .header {
-  background-color: #2c3e50;
-  color: white;
-  padding: 15px 0;
+  --header-height: 4rem;
+  --mobile-menu-width: 250px;
+  --transition-duration: 0.3s;
+
+  position: relative;
+  height: var(--header-height);
+  background-color: var(--bg-color-accent);
+  color: var(--color);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.container {
-  width: 90%;
-  max-width: 1200px;
+.header__container {
+  height: 100%;
+  width: 100%;
+  max-width: 1400px;
   margin: 0 auto;
+  padding: var(--p);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.logo a {
-  color: white;
-  text-decoration: none;
-  font-size: 24px;
-  font-weight: bold;
+.header__logo {
+  height: var(--header-height);
+  object-fit: cover;
 }
 
-.nav ul {
+/* Desktop navigation */
+.header__desktop-nav {
   display: flex;
+  align-items: center;
+  gap: var(--m);
+}
+
+.header__desktop-nav a {
+  transition: color var(--transition-duration);
+}
+
+.header__desktop-nav a:hover {
+  color: var(--color-accent);
+}
+
+/* Mobile menu button */
+.header__mobile-button {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  z-index: 1001;
+}
+
+.header__mobile-button span {
+  display: block;
+  width: 25px;
+  height: 2px;
+  background-color: var(--color);
+  margin: 5px 0;
+  transition: all var(--transition-duration) ease;
+}
+
+/* Mobile navigation */
+.header__mobile-nav {
+  position: fixed;
+  top: 0;
+  left: calc(-1 * var(--mobile-menu-width));
+  width: var(--mobile-menu-width);
+  height: 100vh;
+  background-color: var(--bg-color-accent);
+  z-index: 1000;
+  transition: left var(--transition-duration) ease;
+  padding: var(--p);
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.header__mobile-nav--open {
+  left: 0;
+}
+
+.header__mobile-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0;
   list-style: none;
 }
 
-.nav li {
-  margin-left: 20px;
+.header__mobile-nav-list a {
+  transition: color var(--transition-duration);
 }
 
-.nav a {
-  color: white;
-  text-decoration: none;
-  font-size: 16px;
-  transition: color 0.3s;
+.header__mobile-nav-list a:hover {
+  color: var(--color-accent);
 }
 
-.nav a:hover {
-  color: #3498db;
+/* Mobile overlay */
+.header__mobile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .header__desktop-nav > a {
+    display: none;
+  }
+
+  .header__mobile-button {
+    display: block;
+  }
 }
