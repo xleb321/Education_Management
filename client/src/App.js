@@ -1,9 +1,12 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
 import HomePage from "./pages/Home/HomePage";
-import RegistrationPage from "./pages/Registration/RegistrationPage";
+import AuthPage from "./pages/AuthPage/AuthPage";
+
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
+
 import "./App.css";
 
 function App() {
@@ -14,7 +17,7 @@ function App() {
         <main>
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/register" element={<RegistrationPage />} />
+            <Route path="/AuthPage" element={<AuthPage />} />
           </Routes>
         </main>
         <Footer />
