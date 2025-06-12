@@ -1,13 +1,13 @@
-FROM node:18
+FROM node:24
 
 WORKDIR /usr/src/app
-# Изменено место указания package
-COPY ./server/package*.json ./ 
-COPY ./prisma ./prisma/
+
+COPY package*.json ./
 
 RUN npm install
-RUN npx prisma generate
 
-COPY ./server .
+COPY . .
+
+EXPOSE 3001
 
 CMD ["npm", "start"]

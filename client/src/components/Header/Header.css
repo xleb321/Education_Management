@@ -106,7 +106,38 @@
   z-index: 999;
 }
 
-/* Responsive styles */
+.header__icons {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-left: auto;
+  padding-right: 20px;
+}
+
+.header__icon-link {
+  position: relative;
+  color: inherit;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+.header__notification-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: red;
+  color: white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+}
+
 @media (max-width: 768px) {
   .header__desktop-nav > a {
     display: none;

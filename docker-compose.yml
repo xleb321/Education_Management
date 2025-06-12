@@ -1,56 +1,60 @@
 services:
-  db:
+  postgres:
     image: postgres:17
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: yourpassword
-      POSTGRES_DB: yourdb
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-mydb}
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d yourdb"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - ./server/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   pgadmin:
     image: dpage/pgadmin4
+    env_file:
+      - .env
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     ports:
       - "5050:80"
     depends_on:
-      - db
-    restart: unless-stopped
+      - postgres
 
   server:
     build:
-      context: .  # Контекст - корень проекта
-      dockerfile: ./server/Dockerfile # Указание на расположение Dockerfile
+      context: ./server
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+      - ./server/.env
     ports:
-      - "3001:3001"
-    environment:
-      - DATABASE_URL=postgresql://postgres:yourpassword@db:5432/yourdb?schema=public
-      - JWT_SECRET=${JWT_SECRET:-your_super_secret_key}
+      - "${SERVER_PORT:-3001}:3001"
     depends_on:
-      db:
-        condition: service_healthy
-    restart: unless-stopped
+      - postgres
+    environment:
+      DATABASE_URL: "postgresql://${DB_USER}:${DB_PASSWORD}@postgres:${DB_PORT}/${DB_NAME}?schema=public"
+    volumes:
+      - ./server:/usr/src/app
 
   client:
-    build: ./client
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    env_file:
+      - ./client/.env
     ports:
       - "3000:3000"
-    environment:
-      - REACT_APP_API_URL=http://server:3001
-    stdin_open: true
-    tty: true
     depends_on:
       - server
-    restart: unless-stopped
+    volumes:
+      - ./client:/usr/src/app
+    environment:
+      - NODE_ENV=development
 
 volumes:
   postgres_data:
