@@ -1,28 +1,30 @@
 import axios from "axios";
 
 const apiClient = axios.create({
-  baseURL:
-    process.env.NODE_ENV === "development"
-      ? "http://localhost:3001"
-      : process.env.REACT_APP_API_URL,
+  baseURL: process.env.REACT_APP_API_URL || "http://localhost:3001/api",
   timeout: 10000,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
-// Удалите interceptor если он не нужен для базовой работы
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 apiClient.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    console.error("API Error:", error);
-    throw error;
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
   }
 );
 
-// Используйте именованные экспорты
-export const checkHealth = () => apiClient.get("/health");
-export const getWelcomeMessage = () => apiClient.get("/");
-
-// Или альтернативно можно экспортировать объект
-export default {
-  checkHealth,
-  getWelcomeMessage,
-};
+export default apiClient;
