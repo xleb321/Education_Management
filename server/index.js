@@ -9,6 +9,10 @@ dotenv.config();
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  ssl:
+    process.env.NODE_ENV === "production"
+      ? { rejectUnauthorized: false }
+      : false,
 });
 
 const fastify = Fastify({
@@ -24,6 +28,16 @@ const fastify = Fastify({
     },
   },
 });
+
+const checkDatabaseConnection = async () => {
+  try {
+    await pool.query("SELECT 1");
+    console.log("✅ Database connection established");
+  } catch (error) {
+    console.error("❌ Database connection failed:", error);
+    process.exit(1);
+  }
+};
 
 fastify.register(cors, {
   origin: ["http://localhost:3000"],
@@ -44,8 +58,14 @@ async function authenticate(request, reply) {
   }
 }
 
-// Регистрация пользователя
-// Обновленный обработчик регистрации
+fastify.get("/", async (req, reply) => {
+  try {
+    reply.code(418).send({ message: "Добрый день!" });
+  } catch (error) {
+    reply.code(500).send({ error: error.message });
+  }
+});
+
 fastify.post("/register", async (req, reply) => {
   const { firstName, lastName, email, password, phone, course, birthDate } =
     req.body;
@@ -181,6 +201,31 @@ fastify.get("/users", { preHandler: [authenticate] }, async (req, reply) => {
      JOIN roles r ON ur.role_id = r.id`
   );
   reply.send(rows);
+});
+
+// API для работы с факультетами
+fastify.get("/faculties", async (req, reply) => {
+  try {
+    // const facultiesRes = await pool.query(`
+    //   SELECT f.id, f.name, u.id as dean_id,u.name as dean_name
+    //   FROM faculties f
+    //   LEFT JOIN users u ON f.dean_id = u.id
+    //   ORDER BY f.id
+    // `);
+
+    const facultiesRes = await pool.query(`
+      SELECT u.id, u.name
+      FROM users u
+    `);
+
+    reply.send(facultiesRes);
+  } catch (error) {
+    console.error("Error in /faculties:", error);
+    reply.code(500).send({
+      error: "Internal Server Error",
+      details: error.message,
+    });
+  }
 });
 
 // API для работы с расписанием
@@ -396,14 +441,19 @@ fastify.put(
   }
 );
 
-// Запуск сервера
 const start = async () => {
+  console.log("Waiting for PostgreSQL to initialize...");
+  await new Promise((resolve) => setTimeout(resolve, 10000));
+
   try {
+    await checkDatabaseConnection();
+    console.log("✅ Database connection established");
+
     await fastify.listen({
       port: process.env.SERVER_PORT || 3001,
       host: "0.0.0.0",
     });
-    fastify.log.info(`Server running on ${fastify.server.address().port}`);
+    console.log(`Server listening on ${fastify.server.address().port}`);
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);

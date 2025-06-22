@@ -1,8 +1,8 @@
 import React from "react";
-import useAuth from "../../hooks/useAuth";
-import useForm from "../../hooks/useForm";
-import Input from "../../components/common/Input/Input";
-import Button from "../../components/common/Button/Button";
+import useAuth from "@hooks/useAuth";
+import useForm from "@hooks/useForm";
+import Input from "@components/common/Input/Input";
+import Button from "@components/common/Button/Button";
 
 const RegisterForm = ({ onSuccess }) => {
   const { register, loading, error } = useAuth();

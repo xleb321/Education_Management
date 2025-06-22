@@ -1,32 +1,54 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./HomePage.css";
 import { Link } from "react-router-dom";
+import { getFaculties } from "@api/faculties";
 
 const HomePage = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [directions, setDirections] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchDirections = async () => {
+      try {
+        const response = await getFaculties();
+        const formattedDirections = response.map((faculty) => ({
+          title: faculty.name,
+          items: faculty.groups.map((group) => group.name),
+          link: `faculty-${faculty.id}`,
+          dean: faculty.dean_name,
+        }));
+        setDirections(formattedDirections);
+      } catch (err) {
+        console.error("Fetch error:", err);
+        setError(
+          err.response?.data?.error ||
+            err.message ||
+            "Failed to load directions"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDirections();
+  }, []);
 
   const toggleDropdown = (index) => {
     setActiveDropdown(activeDropdown === index ? null : index);
   };
 
-  const directions = [
-    {
-      title: "Управление в технических системах",
-      items: [
-        "Интеллектуальные средства обработки информации",
-        "Качество и управление в технических системах",
-        "Комплексные системы безопасности",
-        "Робототехника и искусственный интеллект",
-        "Системы и средства автоматизации технологических процессов",
-      ],
-      link: "fitu",
-    },
-    {
-      title: "Электроэнергетика и электротехника",
-      items: [],
-      link: "CK",
-    },
-  ];
+  if (loading) return <div className="loading">Загрузка направлений...</div>;
+  if (error)
+    return (
+      <div className="error">
+        Ошибка загрузки направлений: {error}
+        <button onClick={() => window.location.reload()}>
+          Попробовать снова
+        </button>
+      </div>
+    );
 
   return (
     <div className="home-page">
@@ -72,6 +94,7 @@ const HomePage = () => {
         <div className="directions-container">
           {directions.map((direction, index) => (
             <div
+              key={index}
               className={`direction-dropdown ${
                 activeDropdown === index ? "open" : ""
               }`}
@@ -81,6 +104,9 @@ const HomePage = () => {
                 onClick={() => toggleDropdown(index)}
               >
                 {direction.title}
+                {direction.dean && (
+                  <span className="dean-info"> (Декан: {direction.dean})</span>
+                )}
                 <span className="dropdown-icon">
                   {activeDropdown === index ? "▲" : "▼"}
                 </span>

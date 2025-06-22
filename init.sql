@@ -1,170 +1,195 @@
--- Создание таблицы ролей
 CREATE TABLE roles (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
     description TEXT
 );
 
--- Создание таблицы факультетов
 CREATE TABLE faculties (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     dean_id INT,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_dean FOREIGN KEY (dean_id) REFERENCES users(id) DEFERRABLE
 );
 
--- Создание таблицы пользователей
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    email VARCHAR(100) UNIQUE NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     name VARCHAR(100) NOT NULL,
-    faculty_id INT REFERENCES faculties(id),
-    created_at TIMESTAMP DEFAULT NOW(),
-    is_active BOOLEAN DEFAULT TRUE
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE,
+    faculty_id INT,
+    CONSTRAINT fk_faculty FOREIGN KEY (faculty_id) REFERENCES faculties(id) DEFERRABLE
 );
 
--- Добавляем внешний ключ для декана
-ALTER TABLE faculties ADD CONSTRAINT fk_dean FOREIGN KEY (dean_id) REFERENCES users(id);
+CREATE TABLE user_roles (
+    user_id INT NOT NULL,
+    role_id INT NOT NULL,
+    PRIMARY KEY (user_id, role_id),
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_role FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+);
 
--- Создание таблицы групп
 CREATE TABLE student_groups (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
-    faculty_id INT REFERENCES faculties(id),
-    curator_id INT REFERENCES users(id),
-    created_at TIMESTAMP DEFAULT NOW()
+    faculty_id INT,
+    curator_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_faculty FOREIGN KEY (faculty_id) REFERENCES faculties(id),
+    CONSTRAINT fk_curator FOREIGN KEY (curator_id) REFERENCES users(id)
 );
 
--- Создание таблицы предметов
 CREATE TABLE subjects (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    faculty_id INT REFERENCES faculties(id),
-    description TEXT
+    faculty_id INT,
+    description TEXT,
+    CONSTRAINT fk_faculty FOREIGN KEY (faculty_id) REFERENCES faculties(id)
 );
 
--- Создание таблицы расписания
 CREATE TABLE schedules (
     id SERIAL PRIMARY KEY,
-    subject_id INT NOT NULL REFERENCES subjects(id),
-    group_id INT NOT NULL REFERENCES student_groups(id),
-    teacher_id INT NOT NULL REFERENCES users(id),
+    subject_id INT NOT NULL,
+    group_id INT NOT NULL,
+    teacher_id INT NOT NULL,
     room VARCHAR(20) NOT NULL,
     day_of_week SMALLINT NOT NULL CHECK (day_of_week BETWEEN 1 AND 7),
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
     is_even_week BOOLEAN,
     valid_from DATE NOT NULL,
-    valid_until DATE
+    valid_until DATE,
+    CONSTRAINT fk_subject FOREIGN KEY (subject_id) REFERENCES subjects(id),
+    CONSTRAINT fk_group FOREIGN KEY (group_id) REFERENCES student_groups(id),
+    CONSTRAINT fk_teacher FOREIGN KEY (teacher_id) REFERENCES users(id),
+    CONSTRAINT chk_valid_dates CHECK (valid_until IS NULL OR valid_until >= valid_from),
+    CONSTRAINT chk_time CHECK (end_time > start_time)
 );
 
--- Создание таблицы экзаменов
 CREATE TABLE exams (
     id SERIAL PRIMARY KEY,
-    subject_id INT REFERENCES subjects(id),
+    subject_id INT NOT NULL,
     exam_date DATE NOT NULL,
-    teacher_id INT REFERENCES users(id),
-    room VARCHAR(20) NOT NULL
+    teacher_id INT NOT NULL,
+    room VARCHAR(20) NOT NULL,
+    CONSTRAINT fk_subject FOREIGN KEY (subject_id) REFERENCES subjects(id),
+    CONSTRAINT fk_teacher FOREIGN KEY (teacher_id) REFERENCES users(id)
 );
 
--- Создание таблицы оценок
 CREATE TABLE grades (
     id SERIAL PRIMARY KEY,
-    student_id INT REFERENCES users(id),
-    exam_id INT REFERENCES exams(id),
-    grade INT CHECK (grade BETWEEN 0 AND 100),
-    passed BOOLEAN DEFAULT FALSE,
-    recorded_at TIMESTAMP DEFAULT NOW()
+    student_id INT NOT NULL,
+    exam_id INT NOT NULL,
+    grade INT NOT NULL CHECK (grade BETWEEN 0 AND 100),
+    passed BOOLEAN NOT NULL DEFAULT FALSE,
+    recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_student FOREIGN KEY (student_id) REFERENCES users(id),
+    CONSTRAINT fk_exam FOREIGN KEY (exam_id) REFERENCES exams(id)
 );
 
--- Создание таблицы учебных материалов
 CREATE TABLE study_materials (
     id SERIAL PRIMARY KEY,
-    subject_id INT REFERENCES subjects(id),
+    subject_id INT NOT NULL,
     title VARCHAR(255) NOT NULL,
     file_path VARCHAR(255),
-    upload_date TIMESTAMP DEFAULT NOW(),
-    uploaded_by INT REFERENCES users(id)
+    upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    uploaded_by INT NOT NULL,
+    CONSTRAINT fk_subject FOREIGN KEY (subject_id) REFERENCES subjects(id),
+    CONSTRAINT fk_uploader FOREIGN KEY (uploaded_by) REFERENCES users(id)
 );
 
--- Создание таблицы заявок
 CREATE TABLE applications (
     id SERIAL PRIMARY KEY,
-    applicant_id INT NOT NULL REFERENCES users(id),
+    applicant_id INT NOT NULL,
     type VARCHAR(50) NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'На рассмотрении',
     content TEXT,
-    created_at TIMESTAMP DEFAULT NOW(),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     resolved_at TIMESTAMP,
-    resolved_by INT REFERENCES users(id)
+    resolved_by INT,
+    CONSTRAINT fk_applicant FOREIGN KEY (applicant_id) REFERENCES users(id),
+    CONSTRAINT fk_resolver FOREIGN KEY (resolved_by) REFERENCES users(id),
+    CONSTRAINT chk_resolved CHECK ((resolved_at IS NULL AND resolved_by IS NULL) OR 
+                                 (resolved_at IS NOT NULL AND resolved_by IS NOT NULL))
 );
 
--- Создание таблицы стипендий
 CREATE TABLE scholarships (
     id SERIAL PRIMARY KEY,
-    student_id INT NOT NULL REFERENCES users(id),
+    student_id INT NOT NULL,
     type VARCHAR(50) NOT NULL,
-    amount DECIMAL(10, 2) NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL CHECK (amount > 0),
     start_date DATE NOT NULL,
     end_date DATE,
-    is_active BOOLEAN DEFAULT TRUE,
-    approved_by INT REFERENCES users(id)
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    approved_by INT,
+    CONSTRAINT fk_student FOREIGN KEY (student_id) REFERENCES users(id),
+    CONSTRAINT fk_approver FOREIGN KEY (approved_by) REFERENCES users(id),
+    CONSTRAINT chk_dates CHECK (end_date IS NULL OR end_date >= start_date)
 );
 
--- Создание таблицы сообщений
 CREATE TABLE messages (
     id SERIAL PRIMARY KEY,
-    sender_id INT NOT NULL REFERENCES users(id),
-    recipient_id INT REFERENCES users(id),
-    group_id INT REFERENCES student_groups(id),
+    sender_id INT NOT NULL,
+    recipient_id INT,
+    group_id INT,
     content TEXT NOT NULL,
-    sent_at TIMESTAMP DEFAULT NOW(),
-    is_read BOOLEAN DEFAULT FALSE
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT fk_sender FOREIGN KEY (sender_id) REFERENCES users(id),
+    CONSTRAINT fk_recipient FOREIGN KEY (recipient_id) REFERENCES users(id),
+    CONSTRAINT fk_group FOREIGN KEY (group_id) REFERENCES student_groups(id),
+    CONSTRAINT chk_recipient CHECK (recipient_id IS NOT NULL OR group_id IS NOT NULL)
 );
 
--- Создание таблицы уведомлений
 CREATE TABLE notifications (
     id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL REFERENCES users(id),
+    user_id INT NOT NULL,
     title VARCHAR(100) NOT NULL,
     message TEXT NOT NULL,
-    is_read BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT NOW()
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- Создание таблицы карт доступа
 CREATE TABLE access_cards (
     id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES users(id),
-    card_id VARCHAR(50) UNIQUE NOT NULL,
+    user_id INT NOT NULL,
+    card_id VARCHAR(50) NOT NULL UNIQUE,
     valid_until TIMESTAMP NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- Создание таблицы логов доступа
 CREATE TABLE access_logs (
     id SERIAL PRIMARY KEY,
     card_id VARCHAR(50) NOT NULL,
-    access_time TIMESTAMP DEFAULT NOW(),
+    access_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status VARCHAR(20) NOT NULL
 );
 
--- Создание таблицы посещаемости
 CREATE TABLE attendance (
     id SERIAL PRIMARY KEY,
-    student_id INT NOT NULL REFERENCES users(id),
+    student_id INT NOT NULL,
     date DATE NOT NULL,
     entry_time TIMESTAMP,
     exit_time TIMESTAMP,
-    status VARCHAR(20) NOT NULL DEFAULT 'Отсутствует'
+    status VARCHAR(20) NOT NULL DEFAULT 'Отсутствует',
+    CONSTRAINT fk_student FOREIGN KEY (student_id) REFERENCES users(id),
+    CONSTRAINT chk_times CHECK ((entry_time IS NULL AND exit_time IS NULL) OR 
+                              (entry_time IS NOT NULL AND exit_time IS NOT NULL AND exit_time >= entry_time))
 );
 
--- Создание индексов
+-- Индексы
 CREATE INDEX idx_attendance_student_date ON attendance(student_id, date);
 CREATE INDEX idx_messages_recipient ON messages(recipient_id);
 CREATE INDEX idx_messages_group ON messages(group_id);
 CREATE INDEX idx_notifications_unread ON notifications(user_id) WHERE is_read = FALSE;
+CREATE INDEX idx_user_roles_user ON user_roles(user_id);
+CREATE INDEX idx_user_roles_role ON user_roles(role_id);
+CREATE INDEX idx_grades_student ON grades(student_id);
+CREATE INDEX idx_grades_exam ON grades(exam_id);
 
 -- Заполнение ролей
 INSERT INTO roles (name, description) VALUES

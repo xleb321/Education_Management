@@ -10,7 +10,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
+  padding: 1rem 2rem;
 }
 
 .logo img {
@@ -50,4 +50,10 @@
 
 .icon-button:hover {
   background-color: var(--gray-light);
+}
+
+@media screen and (max-width: 880px) {
+  .header .container {
+    padding: 1rem;
+  }
 }

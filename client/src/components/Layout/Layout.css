@@ -8,9 +8,14 @@
 
 .main-content {
   flex: 1;
-  padding: 2rem 0;
 }
 
 .main-content > * {
-  padding: 1rem;
+  padding: 1rem 2rem;
+}
+
+@media screen and (max-width: 880px) {
+  .main-content > * {
+    padding: 1rem 1rem;
+  }
 }
