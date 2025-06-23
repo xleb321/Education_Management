@@ -12,12 +12,28 @@ const HomePage = () => {
   useEffect(() => {
     const fetchFaculties = async () => {
       try {
+        setLoading(true);
+        setError(null);
+
         const data = await getFacultiesWithDirections();
 
-        // Добавляем проверку и инициализацию directions
+        if (!Array.isArray(data)) {
+          throw new Error(
+            `Получены некорректные данные о факультетах \n ${data}`
+          );
+        }
+
         const safeData = data.map((faculty) => ({
-          ...faculty,
-          directions: faculty.directions || [],
+          id: faculty.id || 0,
+          name: faculty.name || "Неизвестный факультет",
+          dean: faculty.dean || "",
+          directions: Array.isArray(faculty.directions)
+            ? faculty.directions.map((d) => ({
+                id: d.id || 0,
+                code: d.code || "",
+                name: d.name || "Неизвестное направление",
+              }))
+            : [],
         }));
 
         setFaculties(safeData);
@@ -126,52 +142,58 @@ const HomePage = () => {
       <section className="faculties-section">
         <h2 className="section-title">Факультеты и направления подготовки</h2>
         <div className="faculties-list">
-          {faculties.map((faculty, index) => (
-            <div
-              key={faculty.id}
-              className={`faculty-card ${
-                activeDropdown === index ? "active" : ""
-              }`}
-            >
+          {faculties.length > 0 ? (
+            faculties.map((faculty, index) => (
               <div
-                className="faculty-header"
-                onClick={() => toggleDropdown(index)}
+                key={faculty.id}
+                className={`faculty-card ${
+                  activeDropdown === index ? "active" : ""
+                }`}
               >
-                <h3 className="faculty-title">
-                  {faculty.name}
-                  {faculty.dean && (
-                    <span className="dean-info"> (Декан: {faculty.dean})</span>
-                  )}
-                </h3>
-                <span className="dropdown-arrow">
-                  {activeDropdown === index ? "▲" : "▼"}
-                </span>
-              </div>
-
-              {activeDropdown === index && (
-                <div className="directions-list">
-                  <ul>
-                    {/* Добавлена проверка на существование directions */}
-                    {(faculty.directions || []).map((direction) => (
-                      <li key={direction.id} className="direction-item">
-                        <Link
-                          to={`/directions/${direction.id}`}
-                          className="direction-link"
-                        >
-                          <span className="direction-code">
-                            {direction.code}
-                          </span>
-                          <span className="direction-name">
-                            {direction.name}
-                          </span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+                <div
+                  className="faculty-header"
+                  onClick={() => toggleDropdown(index)}
+                >
+                  <h3 className="faculty-title">
+                    {faculty.name}
+                    {faculty.dean && (
+                      <span className="dean-info">
+                        {" "}
+                        (Декан: {faculty.dean})
+                      </span>
+                    )}
+                  </h3>
+                  <span className="dropdown-arrow">
+                    {activeDropdown === index ? "▲" : "▼"}
+                  </span>
                 </div>
-              )}
-            </div>
-          ))}
+
+                {activeDropdown === index && (
+                  <div className="directions-list">
+                    <ul>
+                      {faculty.directions.map((direction) => (
+                        <li key={direction.id} className="direction-item">
+                          <Link
+                            to={`/directions/${direction.id}`}
+                            className="direction-link"
+                          >
+                            <span className="direction-code">
+                              {direction.code}
+                            </span>
+                            <span className="direction-name">
+                              {direction.name}
+                            </span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <p className="no-faculties-message">Нет доступных факультетов</p>
+          )}
         </div>
       </section>
     </div>

@@ -3,13 +3,25 @@ import apiClient from "./client";
 export const getFacultiesWithDirections = async () => {
   try {
     const response = await apiClient.get("/faculties/with-directions");
-    return response.data;
+
+    // Проверяем, что ответ существует
+    if (!response) {
+      throw new Error("Нет ответа от сервера");
+    }
+
+    // Сервер возвращает массив напрямую в response.data
+    if (Array.isArray(response)) {
+      return response;
+    }
+
+    throw new Error("Сервер вернул некорректные данные");
   } catch (error) {
     console.error("Error fetching faculties with directions:", error);
-    throw error;
+    return [];
   }
 };
 
+// Остальные функции остаются без изменений
 export const getFacultyDetails = async (facultyId) => {
   try {
     const response = await apiClient.get(`/faculties/${facultyId}`);
@@ -30,8 +42,10 @@ export const getDirectionDetails = async (directionId) => {
   }
 };
 
-export default {
+const facultiesAPI = {
   getFacultiesWithDirections,
   getFacultyDetails,
   getDirectionDetails,
 };
+
+export default facultiesAPI;

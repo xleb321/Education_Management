@@ -90,49 +90,63 @@ fastify.get("/faculties", async (req, reply) => {
 });
 
 fastify.get("/faculties/with-directions", async (req, reply) => {
-  const { rows } = await pool.query(`
-    SELECT 
-      f.id,
-      f.name,
-      f.dean_name as dean,
-      json_agg(
-        json_build_object(
-          'id', d.id,
-          'code', d.code,
-          'name', d.name
-        ) ORDER BY d.code
-      ) FILTER (WHERE d.id IS NOT NULL) as directions
-    FROM faculties f
-    LEFT JOIN directions d ON d.faculty_id = f.id
-    GROUP BY f.id
-    ORDER BY f.id
-  `);
-  reply.send(rows);
+  try {
+    const { rows } = await pool.query(`
+      SELECT 
+        f.id,
+        f.name,
+        f.dean_name as dean,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', d.id,
+              'code', d.code,
+              'name', d.name
+            ) ORDER BY d.code
+          ) FILTER (WHERE d.id IS NOT NULL),
+          '[]'::json
+        ) as directions
+      FROM faculties f
+      LEFT JOIN directions d ON d.faculty_id = f.id
+      GROUP BY f.id
+      ORDER BY f.id
+    `);
+
+    // Универсальный ответ - возвращаем массив напрямую
+    reply.send(rows);
+  } catch (err) {
+    console.error("Database error:", err);
+    reply.status(500).send({
+      success: false,
+      error: "Internal server error",
+    });
+  }
 });
 
-fastify.get("/faculties/:id", async (req, reply) => {
-  const { id } = req.params;
-  const { rows } = await pool.query(
-    `
-    SELECT 
-      f.*,
-      (
-        SELECT json_agg(
-          json_build_object(
-            'id', d.id,
-            'code', d.code,
-            'name', d.name
-          )
-        )
-        FROM directions d
-        WHERE d.faculty_id = f.id
-      ) as directions
-    FROM faculties f
-    WHERE f.id = $1
-  `,
-    [id]
-  );
-  reply.send(rows[0] || null);
+fastify.get("/faculties/:facultyId", async (req, reply) => {
+  try {
+    const { rows } = await pool.query("SELECT * FROM faculties WHERE id = $1", [
+      req.params.facultyId,
+    ]);
+
+    if (rows.length === 0) {
+      return reply.status(404).send({
+        success: false,
+        error: "Факультет не найден",
+      });
+    }
+
+    reply.send({
+      success: true,
+      data: rows[0],
+    });
+  } catch (err) {
+    console.error("Database error:", err);
+    reply.status(500).send({
+      success: false,
+      error: "Internal server error",
+    });
+  }
 });
 
 fastify.get("/directions/:id", async (req, reply) => {
