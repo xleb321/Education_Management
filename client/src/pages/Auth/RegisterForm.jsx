@@ -31,7 +31,21 @@ const RegisterForm = ({ onSuccess }) => {
   );
 
   const onSubmit = (data) => {
-    register(data).then(() => onSuccess && onSuccess());
+    register({
+      email: data.email,
+      password: data.password,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phone: data.phone,
+      patronymic: data.patronymic,
+    })
+      .then(() => {
+        localStorage.setItem("savedEmail", data.email);
+        onSuccess && onSuccess();
+      })
+      .catch((err) => {
+        console.error("Registration error:", err);
+      });
   };
 
   return (

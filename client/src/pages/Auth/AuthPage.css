@@ -53,6 +53,21 @@
   text-align: center;
 }
 
+.remember-me {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.remember-me input {
+  margin-right: 8px;
+}
+
+.error-message {
+  color: #ff4d4f;
+  margin-bottom: 16px;
+}
+
 @media screen and (max-width: 750px) {
   .form-row {
     flex-direction: column;

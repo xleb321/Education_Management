@@ -1,0 +1,11 @@
+const { 
+  user, 
+  isAuthenticated, 
+  login, 
+  logout, 
+  loading, 
+  error 
+} = useAuth();
+
+// Доступ к данным пользователя
+console.log(user?.name, user?.email);
